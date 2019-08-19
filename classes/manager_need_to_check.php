@@ -1,52 +1,60 @@
 <?php
 
+require_once 'data_types/item.php';
+require_once 'data_types/teacher.php';
 
 class ManagerNeedToCheck
 {
-    private $grades;
+    private $courses = array();
+
+    const checkTime = 604800; // 7 days
 
     function __construct()
     {
-        $this->grades = $this->get_grades();
+        $ungradedGrades = $this->get_ungraded_grades();
+        $this->parse_ungraded_grades($ungradedGrades);
+
+        // Посчитать неоценённые работы для курсов и преподавателей
     }
 
     public function get_gui() : string 
     {
-        return $this->get_items_list();
+        print_r($this->courses);
+        return '';
     }
 
 
-
-    private function get_items_list() : string 
+    private function parse_ungraded_grades($ungradedGrades) 
     {
-        $course = 0;
-        $str = '';
-
-        foreach($this->grades as $grade)
+        foreach($ungradedGrades as $grade)
         {
-            if($grade->courseid != $course)
+            if($this->is_course_not_exist($grade->courseid))
             {
-                $course = $grade->courseid;
-                $str.= "<h6>{$grade->coursename}</h6>";
+                $this->add_course_to_array($grade);
+            }
+            
+            $teacher = new CheckingTeacher($grade); // !!! 
+            if($this->is_teacher_not_exist($grade->courseid, $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance)))
+            {
+                $this->add_teacher_to_array($grade);
             }
 
-            $str.= "<p>{$grade->itemname} ({$grade->itemscount}) {$grade->firstname}</p>";
+            if($this->is_item_not_exist($grade))
+            {
+                $this->add_item_to_array($grade);
+            }
+            else
+            {
+                $this->update_item($grade);
+            }
         }
-
-        return $str;
     }
 
-    private function get_grades()
+    private function get_ungraded_grades()
     {
         $grades = $this->get_ungraded_users();
+        // Because grades contains teachers and managers attempts.
         $grades = $this->filter_out_all_non_students($grades);
-
-        // Подсчитать работы и т.д.
-
-
-        echo "count: " .count($grades);
-        //print_r($grades);
-
         return $grades;
     }
 
@@ -54,7 +62,8 @@ class ManagerNeedToCheck
     {
         global $DB;
         // Группировка по itemid приводит к неправильным результатам (вероятно я не умею её использовать правильно)
-        $sql = 'SELECT gg.id, gg.itemid, gi.itemname, gg.userid, gi.courseid, c.shortname AS coursename, u.firstname
+        $sql = 'SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
+                       gg.userid, gg.usermodified, gi.courseid, c.fullname AS coursename, u.firstname 
         FROM {grade_grades} AS gg, {grade_items} AS gi, {course} AS c, {user} AS u
         WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded
             AND gg.itemid= gi.id AND gi.hidden=0 # Add itemname
@@ -102,6 +111,123 @@ class ManagerNeedToCheck
         return true;
     }
 
+    private function is_course_not_exist(int $courseid) : bool 
+    {
+        foreach($this->courses as $course)
+        {
+            if($course->id == $courseid) return false;
+        }
+
+        return true;
+    }
+
+    private function add_course_to_array(stdClass $grade) : void 
+    {
+        $course = new stdClass;
+        $course->id = $grade->courseid;
+        $course->name = $grade->coursename;
+        $course->teachers = array();
+
+        $this->courses[] = $course;
+    }
+
+    private function is_teacher_not_exist(int $courseid, int $teacherid) : bool 
+    {
+        foreach($this->courses as $course)
+        {
+            if($course->id == $courseid)
+            {
+                foreach($course->teachers as $teacher)
+                {
+                    if($teacher->get_id() == $teacherid) return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function add_teacher_to_array(stdClass $grade) : void 
+    {
+        $teacher = new CheckingTeacher($grade);
+
+        foreach($this->courses as $course)
+        {
+            if($course->id == $grade->courseid)
+            {
+                $course->teachers[] = $teacher;
+                break;
+            }
+        }
+    }
+
+    private function is_item_not_exist(stdClass $grade) : bool 
+    {
+        foreach($this->courses as $course)
+        {
+            if($course->id == $grade->courseid)
+            {
+                foreach($course->teachers as $teacher)
+                {
+                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
+                    {
+                        foreach($teacher->get_items() as $item)
+                        {
+                            if($item->get_id() == $grade->itemid) return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function add_item_to_array(stdClass $grade) : void 
+    {
+        $item = new checkedItem($grade);
+
+        foreach($this->courses as $course)
+        {
+            if($course->id == $grade->courseid)
+            {
+                foreach($course->teachers as $teacher)
+                {
+                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
+                    {
+                        $teacher->add_item($item);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private function update_item(stdClass $grade) 
+    {
+        $item = $this->get_item($grade);
+        $item->update_works_count($grade);
+    }
+
+    private function get_item(stdClass $grade)
+    {
+        foreach($this->courses as $course)
+        {
+            if($course->id == $grade->courseid)
+            {
+                foreach($course->teachers as $teacher)
+                {
+                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
+                    {
+                        foreach($teacher->get_items() as $item)
+                        {
+                            if($item->get_id() == $grade->itemid) return $item;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
 
