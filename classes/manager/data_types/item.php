@@ -1,14 +1,10 @@
 <?php
 
-class checkedItem 
+class CheckingItem extends ParentType
 {
 
     // params neccessary for gui
-    private $id;
-    private $name;
     private $link;
-    private $uncheckedWorksCount;
-    private $expiredWorksCount;
 
     // technical params
     private $itemmodule;
@@ -41,29 +37,9 @@ class checkedItem
         }
     }
 
-    public function get_id() : int
-    {
-        return $this->id;
-    }
-
-    public function get_name() : string 
-    {
-        return $this->name;
-    }
-
     public function get_link() : string 
     {
         return $this->link;
-    }
-
-    public function get_unchecked_works_count() : int 
-    {
-        return $this->uncheckedWorksCount;
-    }
-
-    public function get_expired_works_count() : int 
-    {
-        return $this->expiredWorksCount;
     }
 
     public function update_works_count(stdClass $grade) : void 

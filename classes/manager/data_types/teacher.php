@@ -1,13 +1,9 @@
 <?php
 
-class CheckingTeacher 
+class CheckingTeacher extends ParentType
 {
 
     // params neccessary for gui
-    private $id;
-    private $name;
-    private $uncheckedWorksCount;
-    private $expiredWorksCount;
     private $items;
 
     // technical params
@@ -30,32 +26,12 @@ class CheckingTeacher
         $this->items = array();
     }
 
-    public function get_id()
-    {
-        return $this->id;
-    }
-
-    public function get_name() : string
-    {
-        return $this->name;
-    }
-
-    public function get_unchecked_works_count() : int 
-    {
-        return $this->uncheckedWorksCount;
-    }
-
-    public function get_expired_works_count() : int
-    {
-        return $this->expiredWorksCount;
-    }
-
     public function get_items() : array
     {
         return $this->items;
     }
 
-    public function add_item(checkedItem $item) : void
+    public function add_item(CheckingItem $item) : void
     {
         $this->items[] = $item;
     }
