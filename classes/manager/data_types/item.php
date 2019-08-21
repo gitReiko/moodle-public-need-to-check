@@ -14,6 +14,7 @@ class CheckingItem extends ParentType
     const checkTime = 604800; // 7 days
 
     // Item types
+    const assign = 'assign';
     const quiz = 'quiz';
 
     function __construct(stdClass $grade) 
@@ -57,7 +58,11 @@ class CheckingItem extends ParentType
 
     private function get_item_link() : string
     {
-        if($this->itemmodule == self::quiz)
+        if($this->itemmodule == self::assign)
+        {
+            return $this->get_assign_link();
+        }
+        else if($this->itemmodule == self::quiz)
         {
             return $this->get_quiz_link();
         }
@@ -65,6 +70,12 @@ class CheckingItem extends ParentType
         {
             return '';
         }
+    }
+
+    private function get_assign_link() : string 
+    {
+        $cm = get_coursemodule_from_instance('assign', $this->iteminstance);
+        return "/mod/assign/view.php?action=grading&id={$cm->id}";   
     }
 
     private function get_quiz_link() : string
@@ -75,7 +86,11 @@ class CheckingItem extends ParentType
 
     private function get_item_timefinish() 
     {
-        if($this->itemmodule == self::quiz)
+        if($this->itemmodule == self::assign)
+        {
+            return $this->get_assign_timefinish();
+        }
+        else if($this->itemmodule == self::quiz)
         {
             return $this->get_quiz_attempt_timefinish();
         }
@@ -83,6 +98,14 @@ class CheckingItem extends ParentType
         {
             return 0;
         }
+    }
+
+    private function get_assign_timefinish()
+    {
+        global $DB;
+        $conditions = array('assignment'=>$this->iteminstance, 'userid'=>$this->studentid, 'latest'=>1);
+        $assignAttempt = $DB->get_record('assign_submission', $conditions);
+        return $assignAttempt->timemodified;
     }
 
     private function get_quiz_attempt_timefinish()
