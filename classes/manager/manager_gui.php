@@ -43,8 +43,12 @@ class ManagerGUI
 
     private function get_teacher_string($teacher) : string 
     {
-        $str = '<p style="margin-left: 10px;">'.$teacher->get_name().' (';
-        $str.= $teacher->get_unchecked_works_count().' - ';
+        $str = '<p style="margin-left: 10px;">';
+
+        if(!empty($teacher->get_name())) $str.= $teacher->get_name();
+        else $str .= get_string('not_assigned', 'block_need_to_check');
+
+        $str.= ' ('.$teacher->get_unchecked_works_count().' - ';
         $str.= '<span style="color: red;">'.$teacher->get_expired_works_count().'</span>)</p>';
         return $str;
     }
