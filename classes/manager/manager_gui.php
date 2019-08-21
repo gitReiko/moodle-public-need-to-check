@@ -17,48 +17,79 @@ class ManagerGUI
 
         foreach($this->courses as $course)
         {
-            $gui.= $this->get_course_string($course);
+            $gui.= $this->get_course_row($course);
 
             foreach($course->get_teachers() as $teacher)
             {
-                $gui.= $this->get_teacher_string($teacher);
+                $teacherid = $this->get_teacherid($course, $teacher);
 
+                $gui.= $this->get_teacher_row($teacher, $teacherid);
+
+                $gui.= $this->get_items_container_begin($teacherid);
                 foreach($teacher->get_items() as $item)
                 {
-                    $gui.= $this->get_item_string($item);
+                    $gui.= $this->get_item_row($item);
                 }
+                $gui.= $this->get_items_container_end();
             }
         }
 
         return $gui;
     }
 
-    private function get_course_string($course) : string 
+    private function get_course_row($course) : string 
     {
-        $str = '<p>'.$course->get_name().' (';
-        $str.= $course->get_unchecked_works_count().' - ';
-        $str.= '<span style="color: red;">'.$course->get_expired_works_count().'</span>)</p>';
+        $row = '<div>';
+        $row.= $course->get_name();
+        $row.= $this->get_unchecked_and_expired_string($course);
+        $row.= '</div>';
+        return $row;
+    }
+
+    private function get_teacher_row($teacher, $teacherid) : string 
+    {
+        $row = '<div class="chekingTeacher" onclick="hide_or_show_block(`'.$teacherid.'`)">⇩';
+
+        if(!empty($teacher->get_name())) $row.= $teacher->get_name();
+        else $row .= get_string('not_assigned', 'block_need_to_check');
+
+        $row.= $this->get_unchecked_and_expired_string($teacher);
+        $row.= '</div>';
+        return $row;
+    }
+
+    private function get_item_row($item) : string 
+    {
+        $row = '<a href="'.$item->get_link().'" target="_blank">';
+        $row.= '<div class="chekingItem">';
+        $row.= $item->get_name();
+        $row.= $this->get_unchecked_and_expired_string($item);
+        $row.= '</div>';
+        $row.= '</a>';
+        return $row;
+    }
+
+    private function get_unchecked_and_expired_string($value) : string 
+    {
+        // (xx - xx) - xx - works count.
+        $str = ' ('.$value->get_unchecked_works_count().' - ';
+        $str.= '<span style="color: red;">'.$value->get_expired_works_count().'</span>)';
         return $str;
     }
 
-    private function get_teacher_string($teacher) : string 
+    private function get_items_container_begin($teacherid) : string 
     {
-        $str = '<p style="margin-left: 10px;">';
-
-        if(!empty($teacher->get_name())) $str.= $teacher->get_name();
-        else $str .= get_string('not_assigned', 'block_need_to_check');
-
-        $str.= ' ('.$teacher->get_unchecked_works_count().' - ';
-        $str.= '<span style="color: red;">'.$teacher->get_expired_works_count().'</span>)</p>';
-        return $str;
+        return "<div id='{$teacherid}' style='display: none;'>";
     }
 
-    private function get_item_string($item) : string 
+    private function get_items_container_end() : string 
     {
-        $str = '<a href="'.$item->get_link().'" target="_blank"><p style="margin-left: 20px;">'.$item->get_name().' (';
-        $str.= $item->get_unchecked_works_count().' - ';
-        $str.= '<span style="color: red;">'.$item->get_expired_works_count().'</span>)</p></a>';
-        return $str;
+        return '</div>';
+    }
+
+    private function get_teacherid($course, $teacher) : string 
+    {
+        return "{$course->get_id()}+{$teacher->get_id()}";
     }
 
 }

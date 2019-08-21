@@ -17,6 +17,8 @@ class block_need_to_check extends block_base
 
         $this->content->text = $manager->get_gui();
 
+        $this->page->requires->js("/blocks/need_to_check/script.js");
+
         return $this->content;
     }
 }

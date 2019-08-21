@@ -37,14 +37,14 @@ class ManagerNeedToCheck
     {
         global $DB;
         // Группировка по itemid приводит к неправильным результатам (вероятно я не умею её использовать правильно)
-        $sql = 'SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
+        $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
                        gg.userid, gg.usermodified, gi.courseid, c.fullname AS coursename, u.firstname 
         FROM {grade_grades} AS gg, {grade_items} AS gi, {course} AS c, {user} AS u
-        WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded
+        WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded assign, quiz
             AND gg.itemid= gi.id AND gi.hidden=0 # Add itemname
             AND gg.userid=u.id
             AND gi.courseid=c.id # Add course name
-        ORDER BY c.shortname, gi.itemname';
+        ORDER BY c.shortname, gi.itemname";
 
         return $DB->get_records_sql($sql, array());
     }

@@ -1,7 +1,22 @@
 
-/*
-.redd
+div.chekingTeacher
 {
-    color: red !important;
+    margin-left: 20px !important;
+    cursor: pointer;
+    color: #121d54;
 }
-*/
+
+div.chekingTeacher:hover 
+{
+    color: #cc223c;
+}
+
+div.chekingItem
+{
+    margin-left: 40px !important;
+}
+
+.redColor
+{
+    color: red;
+}
