@@ -23,27 +23,27 @@ class ManagerCoursesArrayCreater
         foreach($this->ungradedGrades as $grade)
         {
             $coursekey = $this->get_course_key($grade->courseid);
-            if(empty($coursekey))
+            if(!isset($coursekey))
             {
                 $this->add_course_to_array($grade);
                 $coursekey = $this->get_course_key($grade->courseid);
             }
 
             $teacherkey = $this->get_teacher_key($coursekey, $grade);
-            print_r($teacherkey);
-            if(empty($teacherkey))
+            if(!isset($teacherkey))
             {
                 $this->add_teacher_to_array($coursekey, $grade);
                 $teacherkey = $this->get_teacher_key($coursekey, $grade);
             }
 
-            if($this->is_item_not_exist($grade))
+            $itemkey = $this->get_item_key($coursekey, $teacherkey, $grade);
+            if(!isset($itemkey))
             {
-                $this->add_item_to_array($grade);
+                $this->add_item_to_array($coursekey, $teacherkey, $grade);
             }
             else
             {
-                $this->update_item($grade);
+                $this->update_item($coursekey, $teacherkey, $itemkey, $grade);
             }
         }
     }
@@ -79,11 +79,7 @@ class ManagerCoursesArrayCreater
                 $teacherid = $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance);
             }
 
-            if($teacher->get_id() == $teacherid) 
-            {
-                echo "yes<br>"; // Условие срабатывает, но ключ не возвращает !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                return $key;
-            }
+            if($teacher->get_id() == $teacherid) return $key;
             
         }
 
@@ -96,72 +92,29 @@ class ManagerCoursesArrayCreater
         $this->courses[$coursekey]->add_teacher($teacher);
     }
 
-    private function is_item_not_exist(stdClass $grade) : bool 
+    /**
+     * Looks for an array key for this teacher and returns it.
+     */
+    private function get_item_key($coursekey, $teacherkey, $grade)
     {
-        foreach($this->courses as $course)
+        foreach($this->courses[$coursekey]->get_teachers()[$teacherkey]->get_items() as $key => $item)
         {
-            if($course->get_id() == $grade->courseid)
-            {
-                foreach($course->get_teachers() as $teacher)
-                {
-                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
-                    {
-                        foreach($teacher->get_items() as $item)
-                        {
-                            if($item->get_id() == $grade->itemid) return false;
-                        }
-                    }
-                }
-            }
+            if($item->get_id() == $grade->itemid) return $key;
         }
 
-        return true;
+        return null;
     }
 
-    private function add_item_to_array(stdClass $grade) : void 
+    private function add_item_to_array($coursekey, $teacherkey, $grade) : void 
     {
         $item = new CheckingItem($grade);
-
-        foreach($this->courses as $course)
-        {
-            if($course->get_id() == $grade->courseid)
-            {
-                foreach($course->get_teachers() as $teacher)
-                {
-                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
-                    {
-                        $teacher->add_item($item);
-                        return;
-                    }
-                }
-            }
-        }
+        $this->courses[$coursekey]->get_teachers()[$teacherkey]->add_item($item);
     }
 
-    private function update_item(stdClass $grade) 
+    private function update_item($coursekey, $teacherkey, $itemkey, $grade) 
     {
-        $item = $this->get_item($grade);
+        $item = $this->courses[$coursekey]->get_teachers()[$teacherkey]->get_items()[$itemkey];
         $item->update_works_count($grade);
-    }
-
-    private function get_item(stdClass $grade)
-    {
-        foreach($this->courses as $course)
-        {
-            if($course->get_id() == $grade->courseid)
-            {
-                foreach($course->get_teachers() as $teacher)
-                {
-                    if($teacher->get_id() == $teacher->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance))
-                    {
-                        foreach($teacher->get_items() as $item)
-                        {
-                            if($item->get_id() == $grade->itemid) return $item;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private function calculate_unchecked_and_expired_works() : void
