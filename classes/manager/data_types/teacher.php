@@ -1,5 +1,7 @@
 <?php
 
+use need_to_check_lib as nlib;
+
 class CheckingTeacher extends ParentType
 {
 
@@ -15,7 +17,7 @@ class CheckingTeacher extends ParentType
     {
         // Because teacher id is based on student’s id.
         $this->studentid = $grade->userid;
-        $this->teacherRoles = $this->get_teacher_roles();
+        $this->teacherRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
 
         $this->id = $this->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance);
         $this->name = $this->get_teacher_name();
@@ -69,13 +71,6 @@ class CheckingTeacher extends ParentType
         return $teacherid;
     }
 
-    private function get_teacher_roles() : array 
-    {
-        global $DB;
-        $sql = "SELECT id FROM {role} WHERE archetype IN ('teacher', 'editingteacher')";
-        return $DB->get_records_sql($sql);
-    }
-
     private function get_groups_members(array $groups) : array
     {
         $users = array();
@@ -95,7 +90,7 @@ class CheckingTeacher extends ParentType
             {
                 $userRoles = get_user_roles(context_course::instance($courseid), $user->id);
 
-                if($this->is_user_teacher($userRoles))
+                if(nlib\is_user_have_role($this->teacherRoles, $userRoles))
                 {
                     $teachers[] = $user->id;
                 }
@@ -108,20 +103,6 @@ class CheckingTeacher extends ParentType
         $this->activityTeachers = $teachers;
 
         return $teachers;
-    }
-
-    private function is_user_teacher(array $userRoles) : bool 
-    {
-        foreach($userRoles as $userRole)
-        {
-            foreach($this->teacherRoles as $teacherRole)
-            {
-                
-                if($userRole->roleid == $teacherRole->id) return true;
-            }
-        }
-    
-        return false;
     }
 
     private function get_teacher_name() : string 
