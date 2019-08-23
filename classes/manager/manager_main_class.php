@@ -4,9 +4,11 @@ require_once 'data_types/parent_type.php';
 require_once 'data_types/course.php';
 require_once 'data_types/teacher.php';
 require_once 'data_types/item.php';
+require_once 'forum_grade_grades_getter.php';
 require_once 'manager_courses_array_getter.php';
 require_once 'manager_grade_grades_getter.php';
 require_once 'manager_gui.php';
+
 
 class ManagerMainClass
 {
@@ -19,6 +21,10 @@ class ManagerMainClass
 
         $grades = new ManagerGradeGradesGetter($this->managerType);
         $ungradedGrades = $grades->get_grades();
+
+        $forum = new ForumUnratedPostsGetter();
+        $ungradedGrades = array_merge($ungradedGrades, $forum->get_grades());
+        usort($ungradedGrades, "cmp_need_to_check_courses");
 
         $arrayCreater = new ManagerCoursesArrayGetter($ungradedGrades);
         $this->courses = $arrayCreater->get_manager_courses_array();
@@ -34,3 +40,7 @@ class ManagerMainClass
 
 }
 
+function cmp_need_to_check_courses($a, $b)
+{
+    return strcmp($a->coursename, $b->coursename);
+}

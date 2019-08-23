@@ -33,7 +33,7 @@ class ManagerGradeGradesGetter
     {
         
         $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
-                       gg.userid, gg.usermodified, gi.courseid, c.fullname AS coursename, u.firstname 
+                       gg.userid, gi.courseid, c.fullname AS coursename 
         FROM {grade_grades} AS gg, {grade_items} AS gi, {course} AS c, {user} AS u
         WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded assign, quiz
             AND gg.itemid= gi.id AND gi.hidden=0 # Add itemname

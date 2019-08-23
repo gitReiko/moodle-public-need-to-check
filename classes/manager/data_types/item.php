@@ -15,6 +15,7 @@ class CheckingItem extends ParentType
 
     // Item types
     const assign = 'assign';
+    const forum = 'forum';
     const quiz = 'quiz';
 
     function __construct(stdClass $grade) 
@@ -24,7 +25,7 @@ class CheckingItem extends ParentType
         $this->itemmodule = $grade->itemmodule;
         $this->iteminstance = $grade->iteminstance;
         $this->studentid = $grade->userid;
-        $this->timefinish = $this->get_item_timefinish();
+        $this->timefinish = $this->get_item_timefinish($grade);
         $this->link = $this->get_item_link();
         $this->uncheckedWorksCount = 1;
 
@@ -48,7 +49,7 @@ class CheckingItem extends ParentType
         $this->uncheckedWorksCount++;
 
         $this->studentid = $grade->userid;
-        $this->timefinish = $this->get_item_timefinish();
+        $this->timefinish = $this->get_item_timefinish($grade);
 
         if($this->is_check_time_has_expired())
         {
@@ -61,6 +62,10 @@ class CheckingItem extends ParentType
         if($this->itemmodule == self::assign)
         {
             return $this->get_assign_link();
+        }
+        else if($this->itemmodule == self::forum)
+        {
+            return $this->get_forum_link();
         }
         else if($this->itemmodule == self::quiz)
         {
@@ -78,17 +83,27 @@ class CheckingItem extends ParentType
         return "/mod/assign/view.php?action=grading&id={$cm->id}";   
     }
 
+    private function get_forum_link() : string 
+    {
+        $cm = get_coursemodule_from_instance('forum', $this->iteminstance);
+        return "/mod/forum/view.php?id={$cm->id}";   
+    }
+
     private function get_quiz_link() : string
     {
         $cm = get_coursemodule_from_instance('quiz', $this->iteminstance);
         return "/mod/quiz/report.php?id={$cm->id}&mode=overview";
     }
 
-    private function get_item_timefinish() 
+    private function get_item_timefinish($grade) 
     {
         if($this->itemmodule == self::assign)
         {
             return $this->get_assign_timefinish();
+        }
+        else if($this->itemmodule == self::forum)
+        {
+            return $grade->timefinish;
         }
         else if($this->itemmodule == self::quiz)
         {
