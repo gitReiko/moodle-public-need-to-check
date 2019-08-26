@@ -6,6 +6,7 @@ class CheckingTeacher extends ParentType
 {
 
     // params neccessary for gui
+    private $phone;
     private $items;
 
     // technical params
@@ -21,11 +22,17 @@ class CheckingTeacher extends ParentType
 
         $this->id = $this->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance);
         $this->name = $this->get_teacher_name();
+        $this->phone = $this->get_teacher_phone();
 
         $this->uncheckedWorksCount = 0;
         $this->expiredWorksCount = 0;
 
         $this->items = array();
+    }
+
+    public function get_phone() 
+    {
+        return $this->phone;
     }
 
     public function get_items() : array
@@ -69,6 +76,18 @@ class CheckingTeacher extends ParentType
         }
 
         return $teacherid;
+    }
+
+    private function get_teacher_phone()
+    {
+        global $DB;
+        $teacher = $DB->get_record('user', array('id'=>$this->id), 'phone1, phone2');
+
+        $phone = '';
+        if(!empty($teacher->phone1)) $phone.= $teacher->phone1;
+        if(!empty($teacher->phone2)) $phone.= ', '.$teacher->phone2;
+
+        return $phone;
     }
 
     private function get_groups_members(array $groups) : array

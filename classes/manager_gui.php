@@ -47,7 +47,9 @@ class NeedToCheckManagerGUI
 
     private function get_teacher_row($teacher, $teacherid) : string 
     {
-        $row = '<div class="chekingTeacher" onclick="hide_or_show_block(`'.$teacherid.'`)">⇩';
+        $row = '<div class="chekingTeacher" onclick="hide_or_show_block(`'.$teacherid.'`)" ';
+        if(!empty($teacher->get_phone())) $row.= 'title="'.$teacher->get_phone().'"';
+        $row.= '>⇩';
 
         if(!empty($teacher->get_name())) $row.= $teacher->get_name();
         else $row .= get_string('not_assigned', 'block_need_to_check');
