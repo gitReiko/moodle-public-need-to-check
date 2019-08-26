@@ -1,5 +1,7 @@
 <?php
 
+require_once 'forum_grade_grades_getter.php';
+
 use need_to_check_lib as nlib;
 
 abstract class GradeGradesGetter
@@ -8,6 +10,14 @@ abstract class GradeGradesGetter
     {
         $grades = $this->get_ungraded_users();
         $grades = $this->filter_out_all_non_student_users($grades);
+
+        $forumGrades = $this->get_forum_grades();
+        if(is_array($forumGrades))
+        {
+            $grades = array_merge($grades, $forumGrades);
+            usort($grades, "cmp_need_to_check_courses");
+        }
+
         return $grades;
     }
 
@@ -42,6 +52,13 @@ abstract class GradeGradesGetter
     
         return true;
     }
+
+    abstract protected function get_forum_grades();
+}
+
+function cmp_need_to_check_courses($a, $b)
+{
+    return strcmp($a->coursename, $b->coursename);
 }
 
 /**
@@ -62,6 +79,12 @@ class GlobalManagerGradeGradesGetter extends GradeGradesGetter
 
         global $DB;
         return $DB->get_records_sql($sql, array());
+    }
+
+    protected function get_forum_grades()
+    {
+        $forum = new GlobalManagerForumUnratedPostsGetter();
+        return $forum->get_grades();
     }
 }
 
@@ -96,7 +119,7 @@ abstract class LocalGradeGradesGetter extends GradeGradesGetter
         $userGrades = array();
         foreach($grades as $grade)
         {
-            $cmid = $this->get_course_module_id($grade);
+            $cmid = nlib\get_course_module_id($grade);
             $userRoles = get_user_roles(\context_module::instance($cmid), $USER->id);
 
             if(nlib\is_user_have_role($this->archetypeRoles, $userRoles))
@@ -108,21 +131,7 @@ abstract class LocalGradeGradesGetter extends GradeGradesGetter
         return $userGrades;
     }
 
-    private function get_course_module_id($grade)
-    {
-        $sql = "SELECT cm.id
-                FROM {course_modules} AS cm
-                INNER JOIN {modules} AS m
-                ON cm.module=m.id
-                WHERE cm.instance = ? AND m.name=?";
-        $conditions = array($grade->iteminstance, $grade->itemmodule);
-        global $DB;
-
-        $query = $DB->get_record_sql($sql, $conditions);
-
-        if(isset($query->id)) return $query->id;
-        else return null;
-    }
+    abstract protected function get_forum_grades();
 }
 
 /**
@@ -134,6 +143,12 @@ class LocalManagerGradeGradesGetter extends LocalGradeGradesGetter
     {
         $this->archetypeRoles = nlib\get_archetypes_roles(array('manager'));
     }
+
+    protected function get_forum_grades()
+    {
+        $forum = new LocalManagerForumUnratedPostsGetter();
+        return $forum->get_grades();
+    }
 }
 
 /**
@@ -144,5 +159,11 @@ class LocalTeacherGradeGradesGetter extends LocalGradeGradesGetter
     function __construct() 
     {
         $this->archetypeRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
+    }
+
+    protected function get_forum_grades()
+    {
+        $forum = new LocalTeacherForumUnratedPostsGetter();
+        return $forum->get_grades();
     }
 }

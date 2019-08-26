@@ -2,7 +2,7 @@
 
 use need_to_check_lib as nlib;
 
-class ForumUnratedPostsGetter
+abstract class ForumUnratedPostsGetter
 {
 
     public function get_grades()
@@ -19,16 +19,7 @@ class ForumUnratedPostsGetter
         }
     }
 
-    private function get_graded_forums()
-    {
-        global $DB;
-        $sql = "SELECT gi.id as itemid, gi.itemname, gi.iteminstance, gi.itemmodule
-                FROM {forum} AS f 
-                INNER JOIN {grade_items} AS gi
-                ON f.id = gi.iteminstance
-                WHERE assessed <> 0 AND gi.itemmodule='forum' AND gi.hidden=0";
-        return $DB->get_records_sql($sql, array());
-    }
+    abstract protected function get_graded_forums();
 
     private function is_rated_forums_exist($forums) : bool 
     {
@@ -126,3 +117,74 @@ class ForumUnratedPostsGetter
 
 
 }
+
+class GlobalManagerForumUnratedPostsGetter extends ForumUnratedPostsGetter
+{
+    protected function get_graded_forums()
+    {
+        global $DB;
+        $sql = "SELECT gi.id as itemid, gi.itemname, gi.iteminstance, gi.itemmodule
+                FROM {forum} AS f 
+                INNER JOIN {grade_items} AS gi
+                ON f.id = gi.iteminstance
+                WHERE assessed <> 0 AND gi.itemmodule='forum' AND gi.hidden=0";
+        return $DB->get_records_sql($sql, array());
+    }
+}
+
+abstract class LocalForumUnratedPostsGetter extends ForumUnratedPostsGetter 
+{
+    protected $archetypeRoles;
+
+    protected function get_graded_forums()
+    {
+        global $DB;
+        $sql = "SELECT gi.id as itemid, gi.itemname, gi.iteminstance, gi.itemmodule
+                FROM {forum} AS f 
+                INNER JOIN {grade_items} AS gi
+                ON f.id = gi.iteminstance
+                WHERE assessed <> 0 AND gi.itemmodule='forum' AND gi.hidden=0";
+        
+        $forums = $DB->get_records_sql($sql, array());
+        $forums = $this->filter_out_all_non_user_forums($forums);
+
+        return $forums;
+    }
+
+    private function filter_out_all_non_user_forums($forums)
+    {
+        global $USER;
+
+        $userForums = array();
+        foreach($forums as $forum)
+        {
+            $cmid = nlib\get_course_module_id($forum);
+            $userRoles = get_user_roles(\context_module::instance($cmid), $USER->id);
+
+            if(nlib\is_user_have_role($this->archetypeRoles, $userRoles))
+            {
+                $userForums[] = $forum;
+            }
+
+        }
+        return $userForums;
+    }
+}
+
+class LocalManagerForumUnratedPostsGetter extends LocalForumUnratedPostsGetter 
+{
+    function __construct() 
+    {
+        $this->archetypeRoles = nlib\get_archetypes_roles(array('manager'));
+    }
+}
+
+class LocalTeacherForumUnratedPostsGetter extends LocalForumUnratedPostsGetter 
+{
+    function __construct() 
+    {
+        $this->archetypeRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
+    }
+}
+
+

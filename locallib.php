@@ -95,7 +95,21 @@ function is_user_have_role(array $archetypeRoles, array $userRoles) : bool
     return false;
 }
 
+function get_course_module_id($grade)
+{
+    $sql = "SELECT cm.id
+            FROM {course_modules} AS cm
+            INNER JOIN {modules} AS m
+            ON cm.module=m.id
+            WHERE cm.instance = ? AND m.name=?";
+    $conditions = array($grade->iteminstance, $grade->itemmodule);
+    global $DB;
 
+    $query = $DB->get_record_sql($sql, $conditions);
+
+    if(isset($query->id)) return $query->id;
+    else return null;
+}
 
 
 
