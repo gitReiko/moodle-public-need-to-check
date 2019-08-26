@@ -1,11 +1,11 @@
 <?php namespace need_to_check_lib;
 
-function is_user_have_manager_role_in_course()
+function is_user_have_role_in_course(array $archetypes)
 {
     global $USER;
 
     $courses = get_user_courses($USER->id);
-    $archetypeRoles = get_archetypes_roles(array('manager'));
+    $archetypeRoles = get_archetypes_roles($archetypes);
 
     foreach($courses as $courseid)
     {
@@ -22,7 +22,7 @@ function get_user_courses(int $userid)
     $courses = array();
     $courses = array_merge($courses, get_user_courses_from_groups($userid));
     $courses = array_merge($courses, get_user_courses_from_enrollments($userid));
-    array_unique($courses);
+    $courses = array_unique($courses);
     return $courses;
 }
 

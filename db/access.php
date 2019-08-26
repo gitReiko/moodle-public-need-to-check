@@ -36,16 +36,6 @@
         'clonepermissionsfrom' => 'moodle/site:manageblocks'
     ),
 
-    'block/need_to_check:viewteachergui' => array( 
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_BLOCK,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-        ),
- 
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
-    ),
 );
 
 

@@ -1,7 +1,8 @@
 <?php
 
 require_once 'classes/manager/manager_main_class.php';
-require_once 'classes/manager/manager_grade_grades_getter.php';
+require_once 'classes/teacher/teacher_main_class.php';
+require_once 'classes/grade_grades_getter.php';
 require_once 'locallib.php';
 
 use need_to_check_lib as nlib;
@@ -17,25 +18,28 @@ class block_need_to_check extends block_base
     public function get_content() 
     {
         $this->content =  new stdClass;
+        $this->content->text = '';
 
         if(has_capability('block/need_to_check:viewmanagergui', context_system::instance()))
         {
-            $manager = new ManagerMainClass(ManagerGradeGradesGetter::GLOBAL_MANAGER);
+            $grades = new GlobalManagerGradeGradesGetter;
+            $manager = new ManagerMainClass($grades->get_grades());
             $this->content->text = $manager->get_gui();
         }
-        else if(nlib\is_user_have_manager_role_in_course())
+        else if(nlib\is_user_have_role_in_course(array('manager')))
         {
-            $manager = new ManagerMainClass(ManagerGradeGradesGetter::LOCAL_MANAGER);
+            $grades = new LocalManagerGradeGradesGetter;
+            $manager = new ManagerMainClass($grades->get_grades());
             $this->content->text = $manager->get_gui();
         }
 
-
-        if(has_capability('block/need_to_check:viewteachergui', context_system::instance()))
+        if(nlib\is_user_have_role_in_course(array('teacher', 'editingteacher')))
         {
-            // teacher gui
-        }
-
-        
+            $grades = new LocalTeacherGradeGradesGetter;
+            print_r($grades->get_grades());
+            //$teacher = new TeacherMainClass();
+            //$this->content->text.= $teacher->get_gui();
+        }        
 
         $this->page->requires->js("/blocks/need_to_check/script.js");
 
