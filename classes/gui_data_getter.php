@@ -1,6 +1,6 @@
 <?php 
 
-class ManagerCoursesArrayGetter 
+class GuiDataGetter 
 {
     private $ungradedGrades;
     private $courses;

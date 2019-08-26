@@ -1,17 +1,16 @@
 <?php
 
-namespace need_to_check;
-
-class ManagerGUI 
+class NeedToCheckManagerGUI 
 {
     private $courses;
 
-    function __construct(array $courses)
+    function __construct($grades)
     {
-        $this->courses = $courses;
+        $data = new GuiDataGetter($grades);
+        $this->courses = $data->get_manager_courses_array();
     }
 
-    public function display() : string 
+    public function get_gui() : string 
     {
         $gui = '';
 
