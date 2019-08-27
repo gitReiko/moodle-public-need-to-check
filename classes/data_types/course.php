@@ -20,6 +20,11 @@ class CheckingCourse extends ParentType
         return $this->teachers;
     }
 
+    public function set_teachers(array $teachers) : void 
+    {
+        $this->teachers = $teachers;
+    }
+
     public function add_teacher(CheckingTeacher $teacher) : void 
     {
         $this->teachers[] = $teacher;

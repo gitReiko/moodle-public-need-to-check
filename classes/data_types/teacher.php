@@ -84,6 +84,11 @@ class CheckingTeacher extends ParentType
         return $teacherid;
     }
 
+    public function set_items(array $items)
+    {
+        $this->items = $items;
+    }
+
     private function get_teacher_contacts()
     {
         $contacts = '';

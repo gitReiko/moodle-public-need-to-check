@@ -15,6 +15,8 @@ class GuiDataGetter
     {
         $this->parse_ungraded_grades();
         $this->calculate_unchecked_and_expired_works();
+        $this->sort_teachers_and_items();
+
         return $this->courses;
     }
 
@@ -141,4 +143,26 @@ class GuiDataGetter
         }
     }
 
+    private function sort_teachers_and_items() : void 
+    {
+        foreach($this->courses as $course)
+        {
+            $teachers = $course->get_teachers();
+            usort($teachers, array($this, 'cmp_gui_data_teachers_or_items'));
+            $course->set_teachers($teachers);
+
+            foreach($teachers as $teacher)
+            {
+                $items = $teacher->get_items();
+                usort($items, array($this, 'cmp_gui_data_teachers_or_items'));
+                $teacher->set_items($items);
+            }
+        }
+    }
+
+    private function cmp_gui_data_teachers_or_items($a, $b)
+    {
+        return strcmp($a->get_name(), $b->get_name());
+    }
 }
+
