@@ -13,6 +13,7 @@ class CheckingTeacher extends ParentType
     private $studentid;
     private $teacherRoles;
     private $activityTeachers;
+    private $severalTeachers = false;
 
     function __construct(stdClass $grade)
     {
@@ -75,19 +76,28 @@ class CheckingTeacher extends ParentType
             $teacherid = 0;
         }
 
+        if($teachersCount > 1)
+        {
+            $this->severalTeachers = true;
+        }
+
         return $teacherid;
     }
 
     private function get_teacher_contacts()
     {
-        global $DB;
-        $teacher = $DB->get_record('user', array('id'=>$this->id), 'email, phone1, phone2');
-
         $contacts = '';
-        $newline = '&#013;';
-        if(!empty($teacher->email)) $contacts.= 'email: '.$teacher->email.$newline;
-        if(!empty($teacher->phone1)) $contacts.= 'phone1: '.$teacher->phone1.$newline;
-        if(!empty($teacher->phone2)) $contacts.= 'phone2: '.$teacher->phone2;
+
+        if(!$this->severalTeachers)
+        {
+            global $DB;
+            $teacher = $DB->get_record('user', array('id'=>$this->id), 'email, phone1, phone2');
+            
+            $newline = '&#013;';
+            if(!empty($teacher->email)) $contacts.= 'email: '.$teacher->email.$newline;
+            if(!empty($teacher->phone1)) $contacts.= 'phone1: '.$teacher->phone1.$newline;
+            if(!empty($teacher->phone2)) $contacts.= 'phone2: '.$teacher->phone2;
+        }
 
         return $contacts;
     }
