@@ -13,7 +13,11 @@ class NeedToCheckManagerGUI
     public function get_gui() : string 
     {
         $gui = '';
-        $gui.= '<h6><u>'.get_string('teachers_works', 'block_need_to_check').':</u></h6>';
+        
+        if(count($this->courses))
+        {
+            $gui.= '<h6><u>'.get_string('teachers_works', 'block_need_to_check').':</u></h6>';
+        }
 
         foreach($this->courses as $course)
         {
