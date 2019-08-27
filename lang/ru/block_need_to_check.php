@@ -7,3 +7,9 @@ $string['need_to_check:myaddinstance'] = 'Добавить новый блок �
 $string['not_assigned'] = 'Не назначен';
 $string['teachers_works'] = 'Работы преподавателей';
 $string['my_works'] = 'Мои работы';
+$string['email'] = 'почта';
+$string['phone'] = 'телефон';
+
+
+
+

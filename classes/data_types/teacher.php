@@ -99,9 +99,18 @@ class CheckingTeacher extends ParentType
             $teacher = $DB->get_record('user', array('id'=>$this->id), 'email, phone1, phone2');
             
             $newline = '&#013;';
-            if(!empty($teacher->email)) $contacts.= 'email: '.$teacher->email.$newline;
-            if(!empty($teacher->phone1)) $contacts.= 'phone1: '.$teacher->phone1.$newline;
-            if(!empty($teacher->phone2)) $contacts.= 'phone2: '.$teacher->phone2;
+            if(!empty($teacher->email))
+            {
+                $contacts.= get_string('email', 'block_need_to_check').': '.$teacher->email.$newline;
+            }
+            if(!empty($teacher->phone1))
+            {
+                $contacts.= get_string('phone', 'block_need_to_check').' 1: '.$teacher->phone1.$newline;
+            }
+            if(!empty($teacher->phone2))
+            {
+                $contacts.= get_string('phone', 'block_need_to_check').' 2: '.$teacher->phone2;
+            }
         }
 
         return $contacts;

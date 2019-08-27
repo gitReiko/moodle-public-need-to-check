@@ -7,7 +7,8 @@ $string['need_to_check:myaddinstance'] = 'Add a new need to check block to the M
 $string['not_assigned'] = 'Not assigned';
 $string['teachers_works'] = 'Teachers works';
 $string['my_works'] = 'My works';
-
+$string['email'] = 'email';
+$string['phone'] = 'phone';
 
 
 
