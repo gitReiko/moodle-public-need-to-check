@@ -13,6 +13,7 @@ class NeedToCheckManagerGUI
     public function get_gui() : string 
     {
         $gui = '';
+        $gui.= '<h6><u>'.get_string('teachers_works', 'block_need_to_check').':</u></h6>';
 
         foreach($this->courses as $course)
         {
@@ -48,7 +49,7 @@ class NeedToCheckManagerGUI
     private function get_teacher_row($teacher, $teacherid) : string 
     {
         $row = '<div class="chekingTeacher" onclick="hide_or_show_block(`'.$teacherid.'`)" ';
-        if(!empty($teacher->get_phone())) $row.= 'title="'.$teacher->get_phone().'"';
+        if(!empty($teacher->get_contacts())) $row.= 'title="'.$teacher->get_contacts().'"';
         $row.= '>⇩';
 
         if(!empty($teacher->get_name())) $row.= $teacher->get_name();

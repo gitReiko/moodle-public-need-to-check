@@ -6,7 +6,7 @@ class CheckingTeacher extends ParentType
 {
 
     // params neccessary for gui
-    private $phone;
+    private $contacts;
     private $items;
 
     // technical params
@@ -22,7 +22,7 @@ class CheckingTeacher extends ParentType
 
         $this->id = $this->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance);
         $this->name = $this->get_teacher_name();
-        $this->phone = $this->get_teacher_phone();
+        $this->contacts = $this->get_teacher_contacts();
 
         $this->uncheckedWorksCount = 0;
         $this->expiredWorksCount = 0;
@@ -30,9 +30,9 @@ class CheckingTeacher extends ParentType
         $this->items = array();
     }
 
-    public function get_phone() 
+    public function get_contacts() 
     {
-        return $this->phone;
+        return $this->contacts;
     }
 
     public function get_items() : array
@@ -78,16 +78,18 @@ class CheckingTeacher extends ParentType
         return $teacherid;
     }
 
-    private function get_teacher_phone()
+    private function get_teacher_contacts()
     {
         global $DB;
-        $teacher = $DB->get_record('user', array('id'=>$this->id), 'phone1, phone2');
+        $teacher = $DB->get_record('user', array('id'=>$this->id), 'email, phone1, phone2');
 
-        $phone = '';
-        if(!empty($teacher->phone1)) $phone.= $teacher->phone1;
-        if(!empty($teacher->phone2)) $phone.= ', '.$teacher->phone2;
+        $contacts = '';
+        $newline = '&#013;';
+        if(!empty($teacher->email)) $contacts.= 'email: '.$teacher->email.$newline;
+        if(!empty($teacher->phone1)) $contacts.= 'phone1: '.$teacher->phone1.$newline;
+        if(!empty($teacher->phone2)) $contacts.= 'phone2: '.$teacher->phone2;
 
-        return $phone;
+        return $contacts;
     }
 
     private function get_groups_members(array $groups) : array
