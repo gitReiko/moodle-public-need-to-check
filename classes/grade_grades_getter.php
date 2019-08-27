@@ -131,7 +131,10 @@ abstract class LocalGradeGradesGetter extends GradeGradesGetter
         return $userGrades;
     }
 
-    abstract protected function get_forum_grades();
+    protected function get_forum_grades()
+    {
+        
+    }
 }
 
 /**
