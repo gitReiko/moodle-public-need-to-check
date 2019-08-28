@@ -49,4 +49,9 @@ class block_need_to_check extends block_base
 
         return $this->content;
     }
+
+    function has_config() 
+    {
+        return true;
+    }
 }

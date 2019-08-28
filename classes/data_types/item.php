@@ -10,8 +10,7 @@ class CheckingItem extends ParentType
     private $itemmodule;
     private $iteminstance;
     private $studentid;
-
-    const checkTime = 604800; // 7 days
+    private $checkTime;
 
     // Item types
     const assign = 'assign';
@@ -20,6 +19,8 @@ class CheckingItem extends ParentType
 
     function __construct(stdClass $grade) 
     {
+        $this->checkTime = get_config('block_need_to_check', 'check_time');
+
         $this->id = $grade->itemid;
         $this->name = $grade->itemname;
         $this->itemmodule = $grade->itemmodule;
@@ -141,7 +142,7 @@ class CheckingItem extends ParentType
 
     private function is_check_time_has_expired() : bool 
     {
-        if(($this->timefinish + self::checkTime) < time()) return true;
+        if(($this->timefinish + $this->checkTime) < time()) return true;
         else return false;
     }
 
