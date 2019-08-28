@@ -21,7 +21,31 @@ abstract class GradeGradesGetter
         return $grades;
     }
 
-    abstract protected function get_ungraded_users();
+    protected function get_ungraded_users()
+    {
+        $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
+                        gg.userid, gi.courseid, c.fullname AS coursename
+                FROM {grade_grades} AS gg
+                INNER JOIN {grade_items} AS gi
+                ON gg.itemid=gi.id
+                INNER JOIN {user} AS u
+                ON gg.userid = u.id
+                INNER JOIN {course} AS c
+                ON gi.courseid = c.id
+                WHERE gg.finalgrade IS NULL
+                AND gi.itemmodule IN ('assign', 'quiz') 
+                AND gi.hidden=0 
+                AND u.suspended=0
+                AND u.deleted=0
+                ORDER BY c.shortname, gi.itemname"; 
+
+        global $DB;
+        $grades = $DB->get_records_sql($sql, array());
+        $grades = $this->filter_grades($grades);
+        return $grades;
+    }
+
+    abstract protected function filter_grades($grades);
 
     private function filter_out_all_non_student_users(array $grades)
     {
@@ -66,19 +90,9 @@ function cmp_need_to_check_courses($a, $b)
  */
 class GlobalManagerGradeGradesGetter extends GradeGradesGetter
 {
-    protected function get_ungraded_users()
+    protected function filter_grades($grades)
     {
-        $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
-                       gg.userid, gi.courseid, c.fullname AS coursename 
-        FROM {grade_grades} AS gg, {grade_items} AS gi, {course} AS c, {user} AS u
-        WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded assign, quiz
-            AND gg.itemid= gi.id AND gi.hidden=0 # Add itemname
-            AND gg.userid=u.id
-            AND gi.courseid=c.id # Add course name
-        ORDER BY c.shortname, gi.itemname";
-
-        global $DB;
-        return $DB->get_records_sql($sql, array());
+        return $grades;
     }
 
     protected function get_forum_grades()
@@ -95,21 +109,9 @@ abstract class LocalGradeGradesGetter extends GradeGradesGetter
 {
     protected $archetypeRoles;
 
-    protected function get_ungraded_users()
+    protected function filter_grades($grades)
     {
-        $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
-                       gg.userid, gi.courseid, c.fullname AS coursename 
-                FROM {grade_grades} AS gg, {grade_items} AS gi, {course} AS c, {user} AS u
-                WHERE gg.userid=gg.usermodified AND gg.finalgrade IS NULL # Select ungraded assign, quiz
-                    AND gg.itemid= gi.id AND gi.hidden=0 # Add itemname
-                    AND gg.userid=u.id
-                    AND gi.courseid=c.id # Add course name
-                ORDER BY c.shortname, gi.itemname";
-
-        global $DB;
-        $grades = $DB->get_records_sql($sql, array());
-        $grades = $this->filter_out_all_non_user_grades($grades);
-        return $grades;
+        return $this->filter_out_all_non_user_grades($grades);
     }
 
     private function filter_out_all_non_user_grades($grades)

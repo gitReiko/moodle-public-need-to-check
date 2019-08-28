@@ -58,6 +58,46 @@ class CheckingItem extends ParentType
         }
     }
 
+    public function is_item_finished()
+    {
+        if($this->itemmodule == self::assign)
+        {
+            return $this->is_assign_submitted();
+        }
+        else if($this->itemmodule == self::forum)
+        {
+            return true;
+        }
+        else if($this->itemmodule == self::quiz)
+        {
+            return $this->is_quiz_finished();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private function is_assign_submitted()
+    {
+        global $DB;
+        $conditions = array('assignment'=>$this->iteminstance, 'userid'=>$this->studentid, 
+                            'status'=>'submitted', 'latest'=>1); 
+
+        if($DB->record_exists('assign_submission', $conditions)) return true;
+        else return false;
+    }
+
+    private function is_quiz_finished()
+    {
+        global $DB;
+        $lastattempt = $this->get_quiz_last_attempt();
+        $conditions = array('quiz'=>$this->iteminstance, 'userid'=>$this->studentid, 'attempt'=>$lastattempt, 'state'=>'finished');   
+
+        if($DB->record_exists('quiz_attempts', $conditions)) return true;
+        else return false;
+    }
+
     private function get_item_link() : string
     {
         if($this->itemmodule == self::assign)
@@ -130,7 +170,9 @@ class CheckingItem extends ParentType
         $lastattempt = $this->get_quiz_last_attempt();
         $conditions = array('quiz'=>$this->iteminstance, 'userid'=>$this->studentid, 'attempt'=>$lastattempt);
         $quizAttempt = $DB->get_record('quiz_attempts', $conditions);
-        return $quizAttempt->timefinish;
+
+        // Isset is used because invalid data may come due to public function is_item_finished().
+        if(isset($quizAttempt->timefinish)) return $quizAttempt->timefinish;
     }
 
     private function get_quiz_last_attempt()

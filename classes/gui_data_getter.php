@@ -24,28 +24,31 @@ class GuiDataGetter
     {
         foreach($this->ungradedGrades as $grade)
         {
-            $coursekey = $this->get_course_key($grade->courseid);
-            if(!isset($coursekey))
+            if($this->is_item_finished($grade))
             {
-                $this->add_course_to_array($grade);
                 $coursekey = $this->get_course_key($grade->courseid);
-            }
-
-            $teacherkey = $this->get_teacher_key($coursekey, $grade);
-            if(!isset($teacherkey))
-            {
-                $this->add_teacher_to_array($coursekey, $grade);
+                if(!isset($coursekey))
+                {
+                    $this->add_course_to_array($grade);
+                    $coursekey = $this->get_course_key($grade->courseid);
+                }
+    
                 $teacherkey = $this->get_teacher_key($coursekey, $grade);
-            }
-
-            $itemkey = $this->get_item_key($coursekey, $teacherkey, $grade);
-            if(!isset($itemkey))
-            {
-                $this->add_item_to_array($coursekey, $teacherkey, $grade);
-            }
-            else
-            {
-                $this->update_item($coursekey, $teacherkey, $itemkey, $grade);
+                if(!isset($teacherkey))
+                {
+                    $this->add_teacher_to_array($coursekey, $grade);
+                    $teacherkey = $this->get_teacher_key($coursekey, $grade);
+                }
+    
+                $itemkey = $this->get_item_key($coursekey, $teacherkey, $grade);
+                if(!isset($itemkey))
+                {
+                    $this->add_item_to_array($coursekey, $teacherkey, $grade);
+                }
+                else
+                {
+                    $this->update_item($coursekey, $teacherkey, $itemkey, $grade);
+                }
             }
         }
     }
@@ -123,23 +126,29 @@ class GuiDataGetter
     {
         foreach($this->courses as $course)
         {
-            $uncheckedWorksCount = 0;
-            $expiredWorksCount = 0;
+            $courseUncheckedCount = 0;
+            $courseExpiredCount = 0;
 
             foreach($course->get_teachers() as $teacher)
             {
+                $teacherUncheckedCount = 0;
+                $teacherExpiredCount = 0;
+
                 foreach($teacher->get_items() as $item)
                 {
-                    $uncheckedWorksCount += $item->get_unchecked_works_count();
-                    $expiredWorksCount += $item->get_expired_works_count();
+                    $teacherUncheckedCount += $item->get_unchecked_works_count();
+                    $teacherExpiredCount += $item->get_expired_works_count();
                 }
 
-                $teacher->set_unchecked_works_count($uncheckedWorksCount);
-                $teacher->set_expired_works_count($expiredWorksCount);
+                $teacher->set_unchecked_works_count($teacherUncheckedCount);
+                $teacher->set_expired_works_count($teacherExpiredCount);
+
+                $courseUncheckedCount += $teacherUncheckedCount;
+                $courseExpiredCount += $teacherExpiredCount;
             }
 
-            $course->set_unchecked_works_count($uncheckedWorksCount);
-            $course->set_expired_works_count($expiredWorksCount);
+            $course->set_unchecked_works_count($courseUncheckedCount);
+            $course->set_expired_works_count($courseExpiredCount);
         }
     }
 
@@ -163,6 +172,13 @@ class GuiDataGetter
     private function cmp_gui_data_teachers_or_items($a, $b)
     {
         return strcmp($a->get_name(), $b->get_name());
+    }
+
+    private function is_item_finished($grade)
+    {
+        $item = new CheckingItem($grade);
+        if($item->is_item_finished()) return true;
+        else return false;
     }
 }
 
