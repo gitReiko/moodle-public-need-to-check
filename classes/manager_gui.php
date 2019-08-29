@@ -43,18 +43,20 @@ class NeedToCheckManagerGUI
 
     private function get_course_row($course) : string 
     {
-        $row = '<div>';
+        $row = '<a href="'.$course->get_link().'" target="_blank">';
+        $row.= '<div>';
         $row.= $course->get_name();
         $row.= $this->get_unchecked_and_expired_string($course);
         $row.= '</div>';
+        $row.= '</a>';
         return $row;
     }
 
     private function get_teacher_row($teacher, $teacherid) : string 
     {
-        $row = '<div class="chekingTeacher" onclick="hide_or_show_block(`'.$teacherid.'`)" ';
+        $row = '<div class="chekingTeacher horizontal-node" onclick="hide_or_show_block(`'.$teacherid.'`)" id="teacher'.$teacherid.'" ';
         if(!empty($teacher->get_contacts())) $row.= 'title="'.$teacher->get_contacts().'"';
-        $row.= '>⇩';
+        $row.= '> ';
 
         if(!empty($teacher->get_name())) $row.= $teacher->get_name();
         else $row .= get_string('not_assigned', 'block_need_to_check');

@@ -37,10 +37,12 @@ class NeedToCheckTeacherGUI
 
     private function get_course_row($course) : string 
     {
-        $row = '<div>';
+        $row = '<a href="'.$course->get_link().'" target="_blank">';
+        $row.= '<div>';
         $row.= $course->get_name();
         $row.= $this->get_unchecked_and_expired_string($course);
         $row.= '</div>';
+        $row.= '</a>';
         return $row;
     }
 

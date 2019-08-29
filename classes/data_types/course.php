@@ -2,6 +2,7 @@
 
 class CheckingCourse extends ParentType
 {
+    private $link;
     private $teachers;
 
     function __construct(stdClass $grade)
@@ -12,7 +13,13 @@ class CheckingCourse extends ParentType
         $this->uncheckedWorksCount = 0;
         $this->expiredWorksCount = 0;
 
+        $this->link = $this->get_course_link($grade->courseid);
         $this->teachers = array();
+    }
+
+    public function get_link() : string 
+    {
+        return $this->link;
     }
 
     public function get_teachers() : array
@@ -28,6 +35,11 @@ class CheckingCourse extends ParentType
     public function add_teacher(CheckingTeacher $teacher) : void 
     {
         $this->teachers[] = $teacher;
+    }
+
+    private function get_course_link(int $courseid) : string 
+    {
+        return "/course/view.php?id=$courseid";
     }
 
 }
