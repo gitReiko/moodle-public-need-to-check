@@ -9,19 +9,9 @@ class CheckingTeacher extends ParentType
     private $contacts;
     private $items;
 
-    // technical params
-    private $studentid;
-    private $teacherRoles;
-    private $activityTeachers;
-    private $severalTeachers = false;
-
-    function __construct(stdClass $grade)
+    function __construct(stdClass $grade, $teacherid)
     {
-        // Because teacher id is based on student’s id.
-        $this->studentid = $grade->userid;
-        $this->teacherRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
-
-        $this->id = $this->get_teacher_id($grade->courseid, $grade->userid, $grade->iteminstance);
+        $this->id = $teacherid;
         $this->name = $this->get_teacher_name();
         $this->contacts = $this->get_teacher_contacts();
 
@@ -46,54 +36,17 @@ class CheckingTeacher extends ParentType
         $this->items[] = $item;
     }
 
-    /**
-     * Returns teacher(s) id.
-     * 
-     * The function exists because id cannot be taken directly.
-     */
-    public function get_teacher_id(int $courseid, int $studentid, int $iteminstance)
-    {
-        $studentGroups = groups_get_user_groups($courseid, $studentid);
-        $groupsMembers = $this->get_groups_members($studentGroups);
-        $teachers = $this->get_teachers($groupsMembers, $courseid);
-
-        $teachersCount = count($teachers);
-        if($teachersCount)
-        {
-            $teacherid = '';
-            for($i = 0; $i < $teachersCount; $i++)
-            {
-                $teacherid.= $teachers[$i];
-
-                if($teachersCount > ($i+1))
-                {
-                    $teacherid.= '+';
-                }
-            }
-        }
-        else
-        {
-            $teacherid = 0;
-        }
-
-        if($teachersCount > 1)
-        {
-            $this->severalTeachers = true;
-        }
-
-        return $teacherid;
-    }
-
     public function set_items(array $items)
     {
         $this->items = $items;
     }
 
+
     private function get_teacher_contacts()
     {
         $contacts = '';
 
-        if(!$this->severalTeachers)
+        if(!empty($this->id))
         {
             global $DB;
             $teacher = $DB->get_record('user', array('id'=>$this->id), 'email, phone1, phone2');
@@ -116,56 +69,16 @@ class CheckingTeacher extends ParentType
         return $contacts;
     }
 
-    private function get_groups_members(array $groups) : array
-    {
-        $users = array();
-        foreach($groups as $group)
-        {
-            $users = array_merge($users, groups_get_members(reset($group), 'u.id'));
-        }
-        return $users;
-    }
-
-    private function get_teachers(array $users, int $courseid) : array 
-    {
-        $teachers = array();
-        foreach($users as $user)
-        {
-            if(isset($user->id))
-            {
-                $userRoles = get_user_roles(context_course::instance($courseid), $user->id);
-
-                if(nlib\is_user_have_role($this->teacherRoles, $userRoles))
-                {
-                    $teachers[] = $user->id;
-                }
-            }
-
-        }
-
-        $teachers = array_unique($teachers);
-
-        $this->activityTeachers = $teachers;
-
-        return $teachers;
-    }
-
     private function get_teacher_name() : string 
     {
-        $teachersCount = count($this->activityTeachers);
-        $name = '';
-
-        for($i = 0; $i < $teachersCount; $i++)
+        if(empty($this->id))
         {
-            $name.= $this->get_user_name($this->activityTeachers[$i]);
-
-            if($teachersCount > ($i+1))
-            {
-                $name.= ', ';
-            }
+            return '';
+        } 
+        else
+        {
+            return $this->get_user_name($this->id);
         }
-
-        return $name;
     }
 
     private function get_user_name(int $id) : string

@@ -46,11 +46,11 @@ class NeedToCheckTeacherGUI
         return $row;
     }
 
-    private function get_unchecked_and_expired_string($value) : string 
+    private function get_unchecked_and_expired_string($course) : string 
     {
         // (xx - xx) - xx - works count.
-        $str = ' ('.$value->get_unchecked_works_count().' - ';
-        $str.= '<span style="color: red;">'.$value->get_expired_works_count().'</span>)';
+        $str = ' ('.$course->get_unchecked_works_count().' - ';
+        $str.= '<span style="color: red;">'.$course->get_expired_works_count().'</span>)';
         return $str;
     }
 
