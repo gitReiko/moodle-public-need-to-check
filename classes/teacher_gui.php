@@ -12,6 +12,7 @@ class NeedToCheckTeacherGUI
 
     public function get_gui()
     {
+        global $USER;
         $gui = '';
 
         if(count($this->courses))
@@ -25,9 +26,12 @@ class NeedToCheckTeacherGUI
 
             foreach($course->get_teachers() as $teacher)
             {
-                foreach($teacher->get_items() as $item)
+                if($teacher->get_id() == $USER->id)
                 {
-                    $gui.= $this->get_item_row($item);
+                    foreach($teacher->get_items() as $item)
+                    {
+                        $gui.= $this->get_item_row($item);
+                    }
                 }
             }
         }
