@@ -21,40 +21,50 @@ class NeedToCheckManagerGUI
 
         foreach($this->courses as $course)
         {
-            $gui.= $this->get_course_row($course);
+            $courseid = $this->get_courseid($course);
+            $gui.= $this->get_course_row($course, $courseid);
+            $gui.= $this->get_course_container_begin($courseid);
 
             foreach($course->get_teachers() as $teacher)
             {
                 $teacherid = $this->get_teacherid($course, $teacher);
-
                 $gui.= $this->get_teacher_row($teacher, $teacherid);
-
                 $gui.= $this->get_items_container_begin($teacherid);
+
                 foreach($teacher->get_items() as $item)
                 {
                     $gui.= $this->get_item_row($item);
                 }
-                $gui.= $this->get_items_container_end();
+
+                $gui.= $this->get_container_end();
             }
+
+            $gui.= $this->get_container_end();
         }
 
         return $gui;
     }
 
-    private function get_course_row($course) : string 
+    private function get_course_row($course, $courseid) : string 
     {
-        $row = '<a href="'.$course->get_link().'" target="_blank">';
-        $row.= '<div>';
+        $row = '<div class="chekingTeacher horizontal-node" 
+                        id="course'.$courseid.'" 
+                        onclick="hide_or_show_block(`'.$courseid.'`, `course`)">';
+        //$row.= '<a href="'.$course->get_link().'" target="_blank">';
         $row.= $course->get_name();
         $row.= $this->get_unchecked_and_expired_string($course);
+        $row.= ' <a href="'.$course->get_link().'" target="_blank">';
+        $row.= '➢ '.get_string('go_to_course', 'block_need_to_check').'</a>';
         $row.= '</div>';
-        $row.= '</a>';
         return $row;
     }
 
     private function get_teacher_row($teacher, $teacherid) : string 
     {
-        $row = '<div class="chekingTeacher horizontal-node" onclick="hide_or_show_block(`'.$teacherid.'`)" id="teacher'.$teacherid.'" ';
+        $row = '<div class="chekingTeacher horizontal-node" 
+                        id="teacher'.$teacherid.'" 
+                        onclick="hide_or_show_block(`'.$teacherid.'`, `teacher`)" 
+                        style="margin-left: 20px !important;" ';
         if(!empty($teacher->get_contacts())) $row.= 'title="'.$teacher->get_contacts().'"';
         $row.= '> ';
 
@@ -90,7 +100,7 @@ class NeedToCheckManagerGUI
         return "<div id='{$teacherid}' style='display: none;'>";
     }
 
-    private function get_items_container_end() : string 
+    private function get_container_end() : string 
     {
         return '</div>';
     }
@@ -98,6 +108,16 @@ class NeedToCheckManagerGUI
     private function get_teacherid($course, $teacher) : string 
     {
         return "{$course->get_id()}+{$teacher->get_id()}";
+    }
+
+    private function get_courseid($course)
+    {
+        return "{$course->get_id()}";
+    }
+
+    private function get_course_container_begin($courseid) : string 
+    {
+        return "<div id='{$courseid}' style='display: none;'>";
     }
 
 }
