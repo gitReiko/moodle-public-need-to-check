@@ -8,6 +8,7 @@ class NeedToCheckTeacherGUI
     {
         $data = new GuiDataGetter($grades);
         $this->courses = $data->get_manager_courses_array();
+        $this->recalculate_unchecked_and_expired_works_for_courses();
     }
 
     public function get_gui()
@@ -37,6 +38,29 @@ class NeedToCheckTeacherGUI
         }
 
         return $gui;
+    }
+
+    private function recalculate_unchecked_and_expired_works_for_courses()
+    {
+        global $USER;
+        
+        foreach($this->courses as $course)
+        {
+            $course->set_unchecked_works_count(0);
+            $course->set_expired_works_count(0);
+
+            foreach($course->get_teachers() as $teacher)
+            {
+                if($teacher->get_id() == $USER->id)
+                {
+                    foreach($teacher->get_items() as $item)
+                    {
+                        $course->set_unchecked_works_count($course->get_unchecked_works_count()+$item->get_unchecked_works_count());
+                        $course->set_expired_works_count($course->get_expired_works_count()+$item->get_expired_works_count());
+                    }
+                }
+            }
+        }
     }
 
     private function get_course_row($course) : string 
