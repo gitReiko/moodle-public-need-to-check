@@ -164,7 +164,8 @@ class GuiDataGetter
         {
             if(isset($user->id))
             {
-                $userRoles = get_user_roles(context_course::instance($grade->courseid), $user->id);
+                $cmid = nlib\get_course_module_id($grade);
+                $userRoles = get_user_roles(\context_module::instance($cmid), $user->id);
 
                 if(nlib\is_user_have_role($teacherRoles, $userRoles))
                 {
