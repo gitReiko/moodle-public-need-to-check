@@ -31,14 +31,14 @@ class block_need_to_check extends block_base
             $manager = new NeedToCheckManagerGUI($grades->get_grades());
             $this->content->text = $manager->get_gui();
         }
-        else if(nlib\is_user_have_role_in_course(array('manager')))
+        else if(nlib\is_user_have_role_in_course_module(array('manager')))
         {
             $grades = new LocalManagerGradeGradesGetter;
             $manager = new NeedToCheckManagerGUI($grades->get_grades());
             $this->content->text = $manager->get_gui();
         }
 
-        if(nlib\is_user_have_role_in_course(array('teacher', 'editingteacher')))
+        if(nlib\is_user_have_role_in_course_module(array('teacher', 'editingteacher')))
         {
             $grades = new LocalTeacherGradeGradesGetter;
             $teacher = new NeedToCheckTeacherGUI($grades->get_grades());

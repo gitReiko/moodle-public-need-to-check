@@ -1,6 +1,6 @@
 <?php namespace need_to_check_lib;
 
-function is_user_have_role_in_course(array $archetypes)
+function is_user_have_role_in_course_module(array $archetypes)
 {
     global $USER;
 
@@ -9,9 +9,14 @@ function is_user_have_role_in_course(array $archetypes)
 
     foreach($courses as $courseid)
     {
-        $userRoles = get_user_roles(\context_course::instance($courseid), $USER->id);
+        $courseModules = get_course_modules($courseid);
 
-        if(is_user_have_role($archetypeRoles, $userRoles)) return true;
+        foreach($courseModules as $courseModule)
+        {
+            $userRoles = get_user_roles(\context_module::instance($courseModule->id), $USER->id);
+    
+            if(is_user_have_role($archetypeRoles, $userRoles)) return true;
+        }
     }
 
     return false;
@@ -59,6 +64,19 @@ function get_course_array_from_query(array $queries)
         $courses[] = $query->courseid;
     }
     return $courses;
+}
+
+function get_course_modules(int $courseid)
+{
+    global $DB;
+    $sql = "SELECT cm.id
+            FROM {course_modules} AS cm
+            INNER JOIN {modules} AS m
+            ON cm.module = m.id
+            WHERE cm.course = ? AND cm.visible = 1 AND cm.deletioninprogress= 0
+            AND m.name IN('assign', 'forum', 'quiz')";
+    $conditions = array($courseid);
+    return $DB->get_records_sql($sql, $conditions);
 }
 
 function get_archetypes_roles(array $archetypes)
