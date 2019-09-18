@@ -113,6 +113,12 @@ function is_user_have_role(array $archetypeRoles, array $userRoles) : bool
     return false;
 }
 
+function get_course_module($grade)
+{   
+    $cmid = get_course_module_id($grade);
+    return get_coursemodule_from_id($grade->itemmodule, $cmid, 0, false, MUST_EXIST);
+}
+
 function get_course_module_id($grade)
 {
     $sql = "SELECT cm.id
@@ -129,7 +135,15 @@ function get_course_module_id($grade)
     else return null;
 }
 
-
+function get_groups_members(array $groups) : array
+{
+    $members = array();
+    foreach($groups as $group)
+    {
+        $members = array_merge($members, groups_get_members(reset($group), 'u.id'));
+    }
+    return $members;
+}
 
 
 

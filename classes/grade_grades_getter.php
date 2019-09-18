@@ -53,7 +53,8 @@ abstract class GradeGradesGetter
 
         foreach($grades as $key => $grade)
         {
-            $userRoles = get_user_roles(\context_course::instance($grade->courseid), $grade->userid);
+            $cm = nlib\get_course_module($grade);
+            $userRoles = get_user_roles(\context_module::instance($cm->id), $grade->userid);
 
             if($this->is_user_not_student($userRoles, $studentArchetypes))
             {
