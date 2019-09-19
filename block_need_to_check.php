@@ -26,7 +26,6 @@ class block_need_to_check extends block_base
         $this->content =  new stdClass;
         $this->content->text = '';
 
-        /*
         if(has_capability('block/need_to_check:viewmanagergui', context_system::instance()))
         {
             $grades = new GlobalManagerGradeGradesGetter;
@@ -45,10 +44,7 @@ class block_need_to_check extends block_base
             $grades = new LocalTeacherGradeGradesGetter;
             $teacher = new NeedToCheckTeacherGUI($grades->get_grades());
             $this->content->text.= $teacher->get_gui();
-        }
-        */   
-        $searcher = new DatabaseTeacherTableManager();
-        $searcher->update_teachers_table();   
+        } 
 
         $this->page->requires->js("/blocks/need_to_check/script.js");
 

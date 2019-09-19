@@ -18,7 +18,7 @@ class DatabaseTeacherTableManager
         $this->teacherRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
     }
 
-    public function update_teachers_table()
+    public function update_teachers_table() : void
     {
         $items = $this->get_ungraded_items();
 
@@ -26,6 +26,11 @@ class DatabaseTeacherTableManager
         {
             $this->update_item_teachers($item);
         }
+    }
+
+    public function update_grade_teachers(stdClass $grade) : void
+    {
+        $this->update_item_teachers($grade);
     }
 
     private function get_ungraded_items()

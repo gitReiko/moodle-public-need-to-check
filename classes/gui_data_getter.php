@@ -6,11 +6,13 @@ class GuiDataGetter
 {
     private $ungradedGrades;
     private $courses;
+    private $dbManager;
 
     function __construct(array $grades)
     {
         $this->ungradedGrades = $grades;
-        $this->courses = array(); 
+        $this->courses = array();
+        $this->dbManager = new DatabaseTeacherTableManager();
     }
 
     public function get_manager_courses_array() 
@@ -28,38 +30,31 @@ class GuiDataGetter
         {
             if($this->is_item_finished($grade))
             {
+                // Using keys significantly speeds up the function.
                 $coursekey = null;
                 $teacherkey = null;
                 $itemkey = null;
 
-                $this->handle_course($grade, $coursekey);
-    
-                $cm = $this->get_course_module($grade);
-                $teachers = $this->get_teachers($grade, $cm);
-
-                if(!count($teachers))
-                {
-                    $teacher = 0;
-                    $this->handle_teacher($grade, $coursekey, $teacherkey, $teacher);
-                    $this->handle_item($grade, $coursekey, $teacherkey, $itemkey);
-                }
-
-                foreach($teachers as $teacher)
-                {
-                    $this->handle_teacher($grade, $coursekey, $teacherkey, $teacher);
-
-                    if($this->is_student_grade_belong_to_teacher($grade, $coursekey, $teacherkey, $teacher))
-                    {
-                        $this->handle_item($grade, $coursekey, $teacherkey, $itemkey);
-                    }
-                }
+                $this->handle_grade_course($grade, $coursekey);
+                $this->handle_grade_teachers($grade, $coursekey, $teacherkey, $itemkey);
+                // Item handle in handle_grade_teachers because one grade can have several teachers
             }
         }
     }
+
+    private function is_item_finished($grade)
+    {
+        $item = new CheckingItem($grade);
+        if($item->is_item_finished()) return true;
+        else return false;
+    }
     
-    private function handle_course($grade, &$coursekey)
+    private function handle_grade_course($grade, &$coursekey)
     {
         $coursekey = $this->get_course_key($grade->courseid);
+        
+        // If the key is missing, then there is no course in the array.
+        // Therefore, we add the course to the array and find its key.
         if(!isset($coursekey))
         {
             $this->add_course_to_array($grade);
@@ -67,17 +62,103 @@ class GuiDataGetter
         }   
     }
 
-    private function handle_teacher($grade, $coursekey, &$teacherkey, $teacher)
+    private function get_course_key(int $courseid)
     {
-        $teacherkey = $this->get_teacher_key($coursekey, $teacher);
-        if(!isset($teacherkey))
+        foreach($this->courses as $key => $course)
         {
-            $this->add_teacher_to_array($coursekey, $grade, $teacher);
+            if($course->get_id() == $courseid) return $key;
+        }
+
+        return null;
+    }
+
+    private function add_course_to_array(stdClass $grade) : void 
+    {
+        $course = new CheckingCourse($grade);
+        $this->courses[] = $course;
+    }
+
+    private function handle_grade_teachers($grade, $coursekey, &$teacherkey, $itemkey)
+    {
+        $teachers = $this->get_grade_teachers($grade);
+
+        foreach($teachers as $teacher)
+        {
             $teacherkey = $this->get_teacher_key($coursekey, $teacher);
+
+            // If the key is missing, then there is no teacher in the array.
+            // Therefore, we add the teacher to the array and find its key.
+            if(!isset($teacherkey))
+            {
+                $this->add_teacher_to_array($coursekey, $grade, $teacher);
+                $teacherkey = $this->get_teacher_key($coursekey, $teacher);
+            }
+
+            $this->handle_grade_item($grade, $coursekey, $teacherkey, $itemkey);
         }
     }
 
-    private function is_student_grade_belong_to_teacher($grade, $coursekey, $teacherkey, $teacherid) : bool 
+    /**
+     * Returns all teachers which belongs to current student grade.
+     */
+    private function get_grade_teachers(stdClass $grade)
+    {
+        $teachers = $this->get_item_teachers($grade);
+
+        $gradeTeachers = array();
+        foreach($teachers as $teacher)
+        {
+            if($this->is_student_grade_belong_to_teacher($grade, $teacher))
+            {
+                $gradeTeachers[] = $teacher;
+            }
+        }
+
+        // Non-existent teacher is required to correctly display information  
+        // about a course in which there is no teacher.
+        if(empty($gradeTeachers))
+        {
+            $gradeTeachers[] = $this->get_non_existent_teacher();
+        }
+
+        return $gradeTeachers;
+    }
+
+    /**
+     * Returns all teachers which belongs to current item.
+     */
+    private function get_item_teachers(stdClass $grade) : array
+    {
+        $teachers = $this->get_teachers_from_database($grade);
+
+        if(empty($teachers))
+        {
+            $this->dbManager->update_grade_teachers($grade);
+            $teachers = $this->get_teachers_from_database($grade);
+        }
+
+        return $teachers;
+    }
+
+    /**
+     * Returns teachers from block_need_to_check_teachers database table.
+     */
+    private function get_teachers_from_database(stdClass $grade) : array 
+    {
+        global $DB;
+        $conditions = array('itemid'=>$grade->itemid);
+        $queries = $DB->get_records('block_need_to_check_teachers', $conditions);
+
+        $teachers = array();
+        foreach($queries as $query)
+        {
+            $teachers[] = $query->teacherid;
+        }
+
+        return $teachers;
+    }
+
+    private function is_student_grade_belong_to_teacher($grade, $teacherid) : bool 
     {
         $studentid = $grade->userid;
 
@@ -94,6 +175,7 @@ class GuiDataGetter
 
         return false;
     }
+    
 
     private function get_user_groups_from_course($courseid, $userid)
     {
@@ -115,79 +197,13 @@ class GuiDataGetter
         return $groups;
     }
 
-    private function handle_item($grade, $coursekey, $teacherkey, $itemkey)
-    {
-        $itemkey = $this->get_item_key($coursekey, $teacherkey, $grade);
-        if(!isset($itemkey))
-        {
-            $this->add_item_to_array($coursekey, $teacherkey, $grade);
-        }
-        else
-        {
-            $this->update_item($coursekey, $teacherkey, $itemkey, $grade);
-        }      
-    }
-
     /**
-     * Looks for an array key for this course and returns it.
+     * Non-existent teacher is required to correctly display information  
+     * about a course in which there is no teacher.
      */
-    private function get_course_key(int $courseid)
+    private function get_non_existent_teacher() : int
     {
-        foreach($this->courses as $key => $course)
-        {
-            if($course->get_id() == $courseid) return $key;
-        }
-
-        return null;
-    }
-
-    private function add_course_to_array(stdClass $grade) : void 
-    {
-        $course = new CheckingCourse($grade);
-        $this->courses[] = $course;
-    }
-
-    private function get_course_module($grade)
-    {   
-        $cmid = nlib\get_course_module_id($grade);
-        return get_coursemodule_from_id($grade->itemmodule, $cmid, 0, false, MUST_EXIST);
-    }
-
-    private function get_teachers(stdClass $grade, stdClass $cm) : array 
-    {
-        $teacherRoles = nlib\get_archetypes_roles(array('teacher', 'editingteacher'));
-        $studentGroups = groups_get_activity_allowed_groups($cm);
-        $users = $this->get_groups_members($studentGroups);
-        
-        $teachers = array();
-        foreach($users as $user)
-        {
-            if(isset($user->id))
-            {
-                $cmid = nlib\get_course_module_id($grade);
-                $userRoles = get_user_roles(\context_module::instance($cmid), $user->id);
-
-                if(nlib\is_user_have_role($teacherRoles, $userRoles))
-                {
-                    $teachers[] = $user->id;
-                }
-            }
-
-        }
-
-        $teachers = array_unique($teachers);
-
-        return $teachers;
-    }
-
-    private function get_groups_members(array $groups) : array
-    {
-        $users = array();
-        foreach($groups as $group)
-        {
-            $users = array_merge($users, groups_get_members(reset($group), 'u.id'));
-        }
-        return $users;
+        return 0;
     }
 
     /**
@@ -207,6 +223,19 @@ class GuiDataGetter
     {
         $teacher = new CheckingTeacher($grade, $teacherid);
         $this->courses[$coursekey]->add_teacher($teacher);
+    }
+
+    private function handle_grade_item($grade, $coursekey, $teacherkey, $itemkey)
+    {
+        $itemkey = $this->get_item_key($coursekey, $teacherkey, $grade);
+        if(!isset($itemkey))
+        {
+            $this->add_item_to_array($coursekey, $teacherkey, $grade);
+        }
+        else
+        {
+            $this->update_item($coursekey, $teacherkey, $itemkey, $grade);
+        }      
     }
 
     /**
@@ -286,11 +315,5 @@ class GuiDataGetter
         return strcmp($a->get_name(), $b->get_name());
     }
 
-    private function is_item_finished($grade)
-    {
-        $item = new CheckingItem($grade);
-        if($item->is_item_finished()) return true;
-        else return false;
-    }
 }
 
