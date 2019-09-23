@@ -26,17 +26,23 @@ class block_need_to_check extends block_base
         $this->content =  new stdClass;
         $this->content->text = '';
 
+        if($this->is_table_update_neccessary())
+        {
+            $this->update_teachers_table();
+            $this->content->text.= $this->get_message_table_updated();
+        }
+
         if(has_capability('block/need_to_check:viewmanagergui', context_system::instance()))
         {
             $grades = new GlobalManagerGradeGradesGetter;
             $manager = new NeedToCheckManagerGUI($grades->get_grades());
-            $this->content->text = $manager->get_gui();
+            $this->content->text.= $manager->get_gui();
         }
         else if(nlib\is_user_have_role_in_course_module(array('manager')))
         {
             $grades = new LocalManagerGradeGradesGetter;
             $manager = new NeedToCheckManagerGUI($grades->get_grades());
-            $this->content->text = $manager->get_gui();
+            $this->content->text.= $manager->get_gui();
         }
 
         if(nlib\is_user_have_role_in_course_module(array('teacher', 'editingteacher')))
@@ -55,4 +61,42 @@ class block_need_to_check extends block_base
     {
         return true;
     }
+
+    private function is_table_update_neccessary() : bool 
+    {
+        if(is_siteadmin())
+        {
+            $update = optional_param('ntc_update_teacher_table', null, PARAM_TEXT);
+
+            if($update)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private function update_teachers_table() : void 
+    {
+        $manager = new DatabaseTeacherTableManager();
+        $manager->update_teachers_table();
+    }
+
+    private function get_message_table_updated() : string 
+    {
+        $msg = '<p style="background-color: #DEF6E6; border: 1px solid green; padding: 10px;">';
+        $msg.= get_string('table_updated', 'block_need_to_check');
+        $msg.= '</p>';
+        return $msg;
+    }
+
+
+
 }

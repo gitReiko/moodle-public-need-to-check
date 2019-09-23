@@ -13,6 +13,8 @@ class NeedToCheckManagerGUI
     public function get_gui() : string 
     {
         $gui = '';
+
+        if(is_siteadmin()) $gui.= $this->get_update_button();
         
         if(count($this->courses))
         {
@@ -43,6 +45,19 @@ class NeedToCheckManagerGUI
         }
 
         return $gui;
+    }
+
+    private function get_update_button() : string 
+    {
+        $btn = '<form>';
+        $btn.= '<input type="submit" 
+                       value="'.get_string('update_teacher_table', 'block_need_to_check').'" 
+                       name="update"
+                       title="'.get_string('update_teacher_table_title', 'block_need_to_check').'" />';
+        $btn.= '<input type="hidden" name="ntc_update_teacher_table" value="1"/>';
+        $btn.= '</form><br>';
+
+        return $btn;
     }
 
     private function get_course_row($course, $courseid) : string 
