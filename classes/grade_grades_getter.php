@@ -9,7 +9,7 @@ abstract class GradeGradesGetter
     public function get_grades()
     {
         $grades = $this->get_ungraded_users();
-        $grades = $this->filter_out_all_non_student_users($grades);
+        $grades = $this->filter_out_all_non_student_grades($grades);
 
         $forumGrades = $this->get_forum_grades();
         if(is_array($forumGrades))
@@ -47,7 +47,7 @@ abstract class GradeGradesGetter
 
     abstract protected function filter_grades($grades);
 
-    private function filter_out_all_non_student_users(array $grades)
+    private function filter_out_all_non_student_grades(array $grades)
     {
         $studentArchetypes = nlib\get_archetypes_roles(array('student'));
 
@@ -109,6 +109,56 @@ class GlobalManagerGradeGradesGetter extends GradeGradesGetter
 abstract class LocalGradeGradesGetter extends GradeGradesGetter 
 {
     protected $archetypeRoles;
+
+    protected function get_ungraded_users()
+    {
+        $sql = "SELECT gg.id, gg.itemid, gi.itemname, gi.itemmodule, gi.iteminstance, 
+                        gg.userid, gi.courseid, c.fullname AS coursename
+                FROM {grade_grades} AS gg
+                INNER JOIN {grade_items} AS gi
+                ON gg.itemid=gi.id
+                INNER JOIN {user} AS u
+                ON gg.userid = u.id
+                INNER JOIN {course} AS c
+                ON gi.courseid = c.id
+                WHERE gg.finalgrade IS NULL
+                AND gi.itemmodule IN ('assign', 'quiz') 
+                AND gi.hidden=0 ";
+
+        $userCoursesCondition = $this->get_user_courses_condition();
+        if(!empty($userCoursesCondition))
+        {
+            $sql.= $userCoursesCondition;
+        }
+
+        $sql.= "AND u.suspended=0
+                AND u.deleted=0
+                ORDER BY c.shortname, gi.itemname"; 
+
+        global $DB;
+        $grades = $DB->get_records_sql($sql, array());
+        $grades = $this->filter_grades($grades);
+        return $grades;
+    }
+
+    private function get_user_courses_condition()
+    {
+        global $USER;
+        $userCourses = nlib\get_user_courses($USER->id);
+
+        if(count($userCourses)) $cond = 'AND gi.courseid IN (';
+        else return '';
+
+        foreach($userCourses as $course)
+        {
+            $cond.= $course;
+
+            if(end($userCourses) != $course) $cond.= ', ';
+            else $cond.= ') ';
+        }
+
+        return $cond;
+    }
 
     protected function filter_grades($grades)
     {

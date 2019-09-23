@@ -63,7 +63,6 @@ class DatabaseTeacherTableManager
                     $teachers[] = $user->id;
                 }
             }
-
         }
 
         // Because the same teacher can be in different groups
