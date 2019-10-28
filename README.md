@@ -75,4 +75,13 @@
 
 Маковский Денис Анатольевич khornau@gmail.com
 
+# Block type plugin «Need to check» for Moodle 3.7.1
+
+### Plugin was developed for «Belarusian State Economic University».
+
+### Description
+
+
+
+
 
