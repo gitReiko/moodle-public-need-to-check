@@ -87,31 +87,30 @@
 
 ![Alt text](https://github.com/gitReiko/need_to_check/blob/master/readme_en_pic.png "Plugin screenshot")
 
-Plugin allows to control check of student work by teachers.
+Plugin allows to control students works check by teachers.
 
 Plugin can only work with assign, quiz and forum.
 
-Depending on the role of user, there are three main usage scenario:
+Depending on user role, there are three main usage scenario:
 - site administrator or global manager sees (controls) all works that needs to be checked by other teachers;
-- local manager sees (controls) works of other teachers in his area of responsibility. Area of responsibility is determined by the role of the manager in any courses;
+- local manager sees (controls) works of other teachers in his area of responsibility. Area of responsibility is determined by manager role in any courses;
 - teacher sees works that he needs to check.
 
-Users with both supervisor and teacher functions use a combined usage scenario.
+Users with both supervisor and teacher functions use combined usage scenario.
 
 *Technical information. In fact, plugin works with archetypes, not roles. Uses three archetypes: manager, editing teacher and teacher.*
 
 Near each element (line) is two numbers: black and red.
-Black number displays the number of students' works that need to be checked at the moment.
-Red number indicates the number of student work that should have already been checked.
+Black number displays number of students' works that need to be checked at the moment.
+Red number indicates number of student work that should have already been checked (time allotted for check expired).
 
 By default, for work check is given 6 days. 
-This setting can be changed in the global settings of the plugin.
+This setting can be changed in global settings of plugin.
 
 The plugin is not intended for communication with teachers.
-However, when you hover mouse over the teacher’s name, his email and phone numbers are displayed,
-if this information is entered in the user profile.
+However, when you hover mouse over the teacher’s name, his email and phone numbers are displayed, if this information is entered in the user profile.
 
-### Install
+### Installation
 
 1. Put all plugin files in a folder need_to_check;
 2. Put the need_to_check folder in the folder "path to moodle/blocks/";
@@ -119,32 +118,32 @@ if this information is entered in the user profile.
 4. Install the plugin on the page that opens;
 5. Add block «Need to check» on any page of the site (through which the plugin will be used).
 
-*Attention. Folder with the plugin should be called exactly need_to_check and be in the folder "path to moodle/blocks/", otherwise the plugin will not install.
-When cloning through the console, the folder is named that way. But when downloading is named differently.*
+*Attention. Folder with plugin should be called exactly need_to_check and be in the folder "path to moodle/blocks/", otherwise plugin will not install.
+When cloning through the console, the folder is named that way. But when downloading differently.*
 
 ### Using
 
-Ordinary users (not admins) just need to go to the page on which the block is placed.
+Ordinary users (not admins) just need to go to the page on which block is placed.
 
 For administrators, there is one subtlety. For faster work, block stores some information in the database.
 This leaves an imprint on the use of plugin.
 
-**For correct work, it is necessary to update the information in the database after changing the composition of teachers who check students' work.**
-**This can only be done by site administrators on the page with the block.**
+**For correct work, it is necessary to update the information in the database after changing the composition of teachers who check students' works.**
+**This can only be done by site administrators on the page with block.**
 
-*The teacher is considered to be checking if he is enrolled in the same group as the student, and also has a role based on the archetype of teacher or editingteacher in the corresponding activity or course.*
+*The teacher is considered checking if he is enrolled in the same group as student, and also has role based on the archetype of teacher or editingteacher in the corresponding activity or course.*
 
 ### Work speed
 
-The speed of loading a page with a block depends on the usage scenario.
-Teachers and local managers load the page almost instantly.
-It can take a long time to load the global manager or administrator page.
+Plugin work speed depends on the usage scenario.
+Teachers and local managers page load almost instantly.
+But global manager or administrator page loading can take a long time.
 
-Download speed depends on the number of works to check.
-Fewer works teachers need to check, faster page loads.
+Page loading speed depends on the number of works that must be checked.
+The fewer works that must be checked, the faster page load.
 
-In addition, operation of entering information into database (needed to speed up work) takes longer time, than a simple page loading.
-Operation of entering information into database is carried out of the first time page with block load or manual operation by administrator.
+In addition, operation of entering information into database (needed to speed up work) takes longer time, than simple page loading.
+The operation of entering information into the database occurs by first loading or administrator manually launching.
 
 ### Third-party dependencies
 
