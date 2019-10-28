@@ -85,7 +85,7 @@
 
 ### Description
 
-![Alt text](https://github.com/gitReiko/need_to_check/blob/master/readme_pic.png "Plugin screenshot")
+![Alt text](https://github.com/gitReiko/need_to_check/blob/master/readme_en_pic.png "Plugin screenshot")
 
 Plugin allows to control check of student work by teachers.
 
