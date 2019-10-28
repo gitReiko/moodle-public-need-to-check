@@ -39,8 +39,8 @@
 1. Поместить все файлы плагина в папку need_to_check;
 2. Поместить папку need_to_check в папку "путь до moodle/blocks/";
 3. Зайти в Moodle под админской учётной запись;
-4. Установить Moodle на открывшейся странице;
-5. Добавить блок Надо проверить на любую страницу сайта (через которую плагин будет использоваться).
+4. Установить плагин на открывшейся странице;
+5. Добавить блок «Надо проверить» на любую страницу сайта (через которую плагин будет использоваться).
 
 *Внимание. Папка с плагином должна называться именно need_to_check и находиться в папке "путь до moodle/blocks/", иначе плагин не установится.
 При клонировании через консоль папка называется именно так. Но при скачивании по другому.*
@@ -110,6 +110,18 @@ This setting can be changed in the global settings of the plugin.
 The plugin is not intended for communication with teachers.
 However, when you hover mouse over the teacher’s name, his email and phone numbers are displayed,
 if this information is entered in the user profile.
+
+### Installation
+
+1. Put all plugin files in a folder need_to_check;
+2. Put the need_to_check folder in the folder "path to moodle/blocks/";
+3. Go to Moodle under the admin account;
+4. Install the plugin on the page that opens;
+5. Add block «Need to check» on any page of the site (through which the plugin will be used).
+
+*Attention. Folder with the plugin should be called exactly need_to_check and be in the folder "path to moodle/blocks/", otherwise the plugin will not install.
+When cloning through the console, the folder is named that way. But when downloading is named differently.*
+
 
 
 
