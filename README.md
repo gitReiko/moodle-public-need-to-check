@@ -49,7 +49,7 @@
 
 Обычным пользователям (не админам) нужно просто зайти на страницу, на которой размещён блок.
 
-Но есть одна тонкость. Для более быстрой работы блок хранит некоторую информацию в базе данных.
+Для администраторов есть одна тонкость. Для более быстрой работы блок хранит некоторую информацию в базе данных.
 Это накладывает отпечаток на использование плагина.
 
 **Для корректной работы необходимо обновлять информацию в базе данных после изменения состава учителей, проверяющих работы студентов.**
@@ -111,7 +111,7 @@ The plugin is not intended for communication with teachers.
 However, when you hover mouse over the teacher’s name, his email and phone numbers are displayed,
 if this information is entered in the user profile.
 
-### Installation
+### Install
 
 1. Put all plugin files in a folder need_to_check;
 2. Put the need_to_check folder in the folder "path to moodle/blocks/";
@@ -122,7 +122,17 @@ if this information is entered in the user profile.
 *Attention. Folder with the plugin should be called exactly need_to_check and be in the folder "path to moodle/blocks/", otherwise the plugin will not install.
 When cloning through the console, the folder is named that way. But when downloading is named differently.*
 
+### Using
 
+Ordinary users (not admins) just need to go to the page on which the block is placed.
+
+For administrators, there is one subtlety. For faster work, block stores some information in the database.
+This leaves an imprint on the use of plugin.
+
+**For correct work, it is necessary to update the information in the database after changing the composition of teachers who check students' work.**
+**This can only be done by site administrators on the page with the block.**
+
+*The teacher is considered to be checking if he is enrolled in the same group as the student, and also has a role based on the archetype of teacher or editingteacher in the corresponding activity or course.*
 
 
 
