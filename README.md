@@ -91,12 +91,12 @@ Plugin allows to control check of student work by teachers.
 
 Plugin can only work with assign, quiz and forum.
 
-Depending on the role of user, there are three main use cases:
+Depending on the role of user, there are three main usage scenario:
 - site administrator or global manager sees (controls) all works that needs to be checked by other teachers;
 - local manager sees (controls) works of other teachers in his area of responsibility. Area of responsibility is determined by the role of the manager in any courses;
 - teacher sees works that he needs to check.
 
-Users with both supervisor and teacher functions use a combined use case.
+Users with both supervisor and teacher functions use a combined usage scenario.
 
 *Technical information. In fact, plugin works with archetypes, not roles. Uses three archetypes: manager, editing teacher and teacher.*
 
@@ -134,6 +134,22 @@ This leaves an imprint on the use of plugin.
 
 *The teacher is considered to be checking if he is enrolled in the same group as the student, and also has a role based on the archetype of teacher or editingteacher in the corresponding activity or course.*
 
+### Work speed
 
+The speed of loading a page with a block depends on the usage scenario.
+Teachers and local managers load the page almost instantly.
+It can take a long time to load the global manager or administrator page.
 
+Download speed depends on the number of works to check.
+Fewer works teachers need to check, faster page loads.
 
+In addition, operation of entering information into database (needed to speed up work) takes longer time, than a simple page loading.
+Operation of entering information into database is carried out of the first time page with block load or manual operation by administrator.
+
+### Third-party dependencies
+
+Are absent.
+
+### Author
+
+Makouski Denis Anatolievich khornau@gmail.com
