@@ -1,5 +1,7 @@
 ### English description is below.
 
+***
+
 # Плагин-блок «Надо проверить» для Moodle 3.7.1
 
 ### Плагин разработан для нужд «Белорусского государственного экономического университета».
@@ -14,7 +16,7 @@
 
 В зависимости от роли пользователя существует три основных сценария использования:
 - администратор сайта или глобальный управляющий видит (контролирует) все работы, которые нужно проверить другим преподавателям;
-- локальный управляющий видит (контролирует) работы других преподавателей в зоне своей ответственности. Зона ответственности определяется ролью управляющий в соответствующих курсах;
+- локальный управляющий видит (контролирует) работы других преподавателей в зоне своей ответственности. Зона ответственности определяется ролью управляющий в каких-либо курсах;
 - преподаватель видит работы, которые ему нужно проверить.
 
 Пользователи имеющие одновременно функции контролёра и преподавателя используют комбинированный сценарий.
@@ -82,6 +84,32 @@
 ### Plugin was developed for «Belarusian State Economic University».
 
 ### Description
+
+![Alt text](https://github.com/gitReiko/need_to_check/blob/master/readme_pic.png "Plugin screenshot")
+
+Plugin allows to control check of student work by teachers.
+
+Plugin can only work with assign, quiz and forum.
+
+Depending on the role of user, there are three main use cases:
+- site administrator or global manager sees (controls) all works that needs to be checked by other teachers;
+- local manager sees (controls) works of other teachers in his area of responsibility. Area of responsibility is determined by the role of the manager in any courses;
+- teacher sees works that he needs to check.
+
+Users with both supervisor and teacher functions use a combined use case.
+
+*Technical information. In fact, plugin works with archetypes, not roles. Uses three archetypes: manager, editing teacher and teacher.*
+
+Near each element (line) is two numbers: black and red.
+Black number displays the number of students' works that need to be checked at the moment.
+Red number indicates the number of student work that should have already been checked.
+
+By default, for work check is given 6 days. 
+This setting can be changed in the global settings of the plugin.
+
+The plugin is not intended for communication with teachers.
+However, when you hover mouse over the teacher’s name, his email and phone numbers are displayed,
+if this information is entered in the user profile.
 
 
 
