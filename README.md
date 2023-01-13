@@ -75,7 +75,7 @@
 
 ### Автор
 
-Маковский Денис Анатольевич khornau@gmail.com
+Yan Lidski
 
 ***
 
@@ -151,4 +151,4 @@ Are absent.
 
 ### Author
 
-Makouski Denis Anatolievich khornau@gmail.com
+Yan Lidski 
